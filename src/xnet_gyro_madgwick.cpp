@@ -35,7 +35,6 @@ bool valid_first_tick_flag; ///
 double left_ticks, right_ticks;
 double left_ticks_prev, right_ticks_prev;
 double delta_left_ticks, delta_right_ticks;
-ros::Time current_time, last_time;
 
 double self_x=0;
 double self_y=0;
@@ -216,7 +215,7 @@ int main( int argc, char* argv[] )
         current_time = ros::Time::now();
 
         double elapsed_dt = (current_time - last_time).toSec();
-	    xdriver_get("imuRaw", &imuRaw_struct, 24);
+	 xdriver_get("imuRaw", &imuRaw_struct, 24);
         // 2ex'scale;
         vf_gx = imuRaw_struct.gx * 0.001;
         vf_gy = imuRaw_struct.gy * 0.001;
@@ -227,7 +226,7 @@ int main( int argc, char* argv[] )
         // call :: madgwick 'AHRS 'see' .c'.h 'github'a= sivertism/madgwicks_AHRS_algorithm_c--sivertism _y16m2git
         MadgwickAHRSupdateIMU(vf_gx, vf_gy, vf_gz, vf_ax, vf_ay, vf_az);
 
-		// ros::Time current_time = ros::Time::now();
+	// ros::Time current_time = ros::Time::now();
 
         // publish the /imu topic
         sensor_msgs::Imu imuMsg;
@@ -237,7 +236,6 @@ int main( int argc, char* argv[] )
         imuMsg.header.frame_id = imu_frame_id_; // "imu";
 
         //set the velocity
-        imuMsg.header.child_frame_id = "base_link";
         imuMsg.angular_velocity.x=vf_gx;
         imuMsg.angular_velocity.y=vf_gy;
         imuMsg.angular_velocity.z=vf_gz;
@@ -246,12 +244,12 @@ int main( int argc, char* argv[] )
         imuMsg.linear_acceleration.y=vf_ay * G_2_MPSS;
         imuMsg.linear_acceleration.z=vf_az * G_2_MPSS;
 
- // 2e' madgwick' Quaternion q0'q1'q2'q3
-    double roll, pitch, yaw;
+       // 2e' madgwick' Quaternion q0'q1'q2'q3
+       double roll, pitch, yaw;
 	// We use a quaternion created from yaw
-    tf::Quaternion imu_quat = tf::Quaternion(q0, q1, q2, q3 );
-    tf::Matrix3x3(imu_quat).getRPY(roll, pitch, yaw);
- // tf Message
+       tf::Quaternion imu_quat = tf::Quaternion(q0, q1, q2, q3 );
+       tf::Matrix3x3(imu_quat).getRPY(roll, pitch, yaw);
+      // tf Message
       tf::Transform transform_tf;
       transform_tf.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
       transform_tf.setRotation(imu_quat);
