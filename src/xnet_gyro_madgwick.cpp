@@ -11,8 +11,9 @@
 #include "robbase_msg/RazorImu.h"
 #include "xnet_gyro_madgwick/xdriver.h"
 // #include "xnet_gyro_madgwick/xdriver.h"
-#define M_PI 3.1415926
+// #define M_PI 3.1415926 // wn. colibri-imx6/usr/include/math.h: Ln.386
 
+ros::Time current_time, last_time;
 typedef struct{
 	int gx, gy, gz;
 	int ax, ay, az;
@@ -168,18 +169,6 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	q3 *= recipNorm;
 }
 
-
-void ticksLR_callback(const robbase_msg::encoders& ticks_msg){
-
-    if (valid_first_tick_flag == false){
-        left_ticks_prev = ticks_msg.ticks_l;
-        right_ticks_prev = ticks_msg.ticks_r;
-        valid_first_tick_flag = true;
-    }
-    //    left_ticks = ticks_msg.lwheelticks;
-    left_ticks = ticks_msg.ticks_l;
-    right_ticks = ticks_msg.ticks_r;
-}
 //
 int main( int argc, char* argv[] )
 {
@@ -248,7 +237,7 @@ int main( int argc, char* argv[] )
         imuMsg.header.frame_id = imu_frame_id_; // "imu";
 
         //set the velocity
-        imuMsg.child_frame_id = "base_link";
+        imuMsg.header.child_frame_id = "base_link";
         imuMsg.angular_velocity.x=vf_gx;
         imuMsg.angular_velocity.y=vf_gy;
         imuMsg.angular_velocity.z=vf_gz;
@@ -261,19 +250,21 @@ int main( int argc, char* argv[] )
     double roll, pitch, yaw;
 	// We use a quaternion created from yaw
     tf::Quaternion imu_quat = tf::Quaternion(q0, q1, q2, q3 );
-    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+    tf::Matrix3x3(imu_quat).getRPY(roll, pitch, yaw);
  // tf Message
       tf::Transform transform_tf;
       transform_tf.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
       transform_tf.setRotation(imu_quat);
 
+        current_time = ros::Time::now();
 	// publishing 'tf: imu/ base_link
-	imu_transform_msg.header.frame_id = "imu"; // imu_frame_id_;
-	imu_transform_msg.header.child_frame_id = "base_link";
-	imu_transform_msg.header.stamp = current_time;
 	// imu_tf_broadcaster.sendTransform(imu_transform_msg);
 	imu_tf_broadcaster.sendTransform( (0.0, 0.0, 0.0), (q0, q1, q2, q3), current_Time, "base_link", imu_frame_id_);
-   // imu_tf_broadcaster.sendTransform( tf::StampedTransform(transform_tf, ros::Time::now(), "world","laser") );
+    // imu_tf_broadcaster.sendTransform( tf::StampedTransform(transform_tf, ros::Time::now(), "world","laser") );
+
+	// imu_transform_msg.header.frame_id = "imu"; // imu_frame_id_;
+	// imu_transform_msg.header.child_frame_id = "base_link";
+	// imu_transform_msg.header.stamp = current_time;
 
         // imu message
         // imuMsg.orientation = imu_quat;
