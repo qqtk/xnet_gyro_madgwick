@@ -254,11 +254,11 @@ int main( int argc, char* argv[] )
       transform_tf.setOrigin( tf::Vector3(0.0, 0.0, 0.0) );
       transform_tf.setRotation(imu_quat);
 
-        current_time = ros::Time::now();
 	// publishing 'tf: imu/ base_link
 	// imu_tf_broadcaster.sendTransform(imu_transform_msg);
-	imu_tf_broadcaster.sendTransform( (0.0, 0.0, 0.0), (q0, q1, q2, q3), current_time, "base_link", imu_frame_id_);
-    // imu_tf_broadcaster.sendTransform( tf::StampedTransform(transform_tf, ros::Time::now(), "world","laser") );
+	// imu_tf_broadcaster.sendTransform( (0.0, 0.0, 0.0), (q0, q1, q2, q3), current_time, "base_link", imu_frame_id_);
+        imu_tf_broadcaster.sendTransform( tf::StampedTransform(transform_tf, ros::Time::now(), "base_link", imu_frame_id_) );
+        // current_time = ros::Time::now();
 
 	// imu_transform_msg.header.frame_id = "imu"; // imu_frame_id_;
 	// imu_transform_msg.header.child_frame_id = "base_link";
