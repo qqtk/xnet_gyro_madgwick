@@ -27,6 +27,7 @@ float vf_roll, vf_pitch, vf_yaw;
 int sampleFreq;
 // #define sampleFreq	100.0f // sample frequency in Hz
 #define G_2_MPSS 1.0
+#define scaleDef 0.001
 #define betaDef		0.1f // 2 * proportional gain
 float beta = betaDef; // 2 * proportional gain (Kp)
 float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;	// quaternion of sensor frame relative to auxiliary frame
@@ -217,12 +218,12 @@ int main( int argc, char* argv[] )
         double elapsed_dt = (current_time - last_time).toSec();
 	 xdriver_get("imuRaw", &imuRaw_struct, 24);
         // 2ex'scale;
-        vf_gx = imuRaw_struct.gx * 0.001;
-        vf_gy = imuRaw_struct.gy * 0.001;
-        vf_gz = imuRaw_struct.gz * 0.001;
-        vf_ax = imuRaw_struct.ax * 0.001;
-        vf_ay = imuRaw_struct.ay * 0.001;
-        vf_az = imuRaw_struct.az * 0.001;
+        vf_gx = (float) imuRaw_struct.gx * scaleDef;
+        vf_gy = (float) imuRaw_struct.gy * scaleDef;
+        vf_gz = (float) imuRaw_struct.gz * scaleDef;
+        vf_ax = (float) imuRaw_struct.ax * scaleDef;
+        vf_ay = (float) imuRaw_struct.ay * scaleDef;
+        vf_az = (float) imuRaw_struct.az * scaleDef;
         // call :: madgwick 'AHRS 'see' .c'.h 'github'a= sivertism/madgwicks_AHRS_algorithm_c--sivertism _y16m2git
         MadgwickAHRSupdateIMU(vf_gx, vf_gy, vf_gz, vf_ax, vf_ay, vf_az);
 
