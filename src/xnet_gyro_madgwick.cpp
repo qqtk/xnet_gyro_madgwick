@@ -167,6 +167,8 @@ void MadgwickAHRSupdateIMU(float gx, float gy, float gz, float ax, float ay, flo
 	q1 *= recipNorm;
 	q2 *= recipNorm;
 	q3 *= recipNorm;
+	// q0: (scalar) wn quaternion [scalar_v, a,b,c] 
+	//vs' ROS quaternion is in the form [x, y, z, w], with w as the scalar, ie. [a,b,c,scalar_v]
 }
 
 //
@@ -248,7 +250,8 @@ int main( int argc, char* argv[] )
        // 2e' madgwick' Quaternion q0'q1'q2'q3
        double roll, pitch, yaw;
 	// We use a quaternion created from yaw
-       tf::Quaternion imu_quat = tf::Quaternion(q0, q1, q2, q3 );
+	// re' ROS quaternion is in the form [x, y, z, w], with w as the scalar. y16m8d26
+       tf::Quaternion imu_quat = tf::Quaternion(q1, q2, q3, q0);
        tf::Matrix3x3(imu_quat).getRPY(roll, pitch, yaw);
       // tf Message
       tf::Transform transform_tf;
@@ -267,10 +270,11 @@ int main( int argc, char* argv[] )
 
         // imu message
         // imuMsg.orientation = imu_quat;
-        imuMsg.orientation.x=q0; //TODO orientation
-        imuMsg.orientation.y=q1;
-        imuMsg.orientation.z=q2;
-        imuMsg.orientation.w=q3;
+        // re' ROS quaternion is in the form [x, y, z, w], with w as the scalar. y16m8d26
+        imuMsg.orientation.x=q1; //TODO orientation
+        imuMsg.orientation.y=q2;
+        imuMsg.orientation.z=q3;
+        imuMsg.orientation.w=q0;
 
         quat2eulerOK();
         rz_vf.header.stamp = current_time;
@@ -294,4 +298,3 @@ int main( int argc, char* argv[] )
         loop_rate.sleep();
     }// end.while _ ros::ok '
 }// end.main
-
